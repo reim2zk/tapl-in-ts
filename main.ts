@@ -32,9 +32,21 @@ function print_term(t: Term): string {
             const s2 = print_term(t.t2)
             return `(${s1} ${s2})`
         }
-            
     }
 }
+
+function refresh_var(t: Term, ctx: {[key: string]: string}): Term {
+    switch(t.type) {
+        case 'var': return vari(t.name in ctx ? ctx[t.name] + "\'" : t.name)
+        case 'abs': {
+            const name_new = name in ctx ? ctx[name] = name + "\'" : t.x.name
+            ctx[name] = name_new
+            return abs(ctx[name_new], refresh_var(t.t, ctx))
+        }
+        case 'app': return app(refresh_var(t.t1, ctx), refresh_var(t.t2, ctx))
+    }
+}
+
 
 // [x|->s] t
 function substitute(x: TmVar, s: Term, t: Term): Term | null {
